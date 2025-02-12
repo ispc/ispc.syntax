@@ -1,0 +1,38 @@
+# Copyright 2025, Intel Corporation
+# SPDX-License-Identifier: BSD
+name: Test Grammar
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out the repository using a pinned commit SHA.
+      - name: Check out repository
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+
+      # Set up Node.js using a pinned commit SHA.
+      - name: Set up Node.js
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # 4.2.0
+        # Replace the above SHA with your chosen pinned commit.
+        with:
+          node-version: '18'
+
+      # Install the vscode-tmgrammar-test package.
+      - name: Install vscode-tmgrammar-test globally
+        run: npm install -g vscode-tmgrammar-test
+
+      # Run grammar tests from the tests folder.
+      - name: Run grammar tests
+        run: vscode-tmgrammar-test tests/*.ispc
