@@ -1,0 +1,20 @@
+{
+    "contributes": {
+        "languages": [
+            {
+                "id": "ispc",
+                "extensions": [
+                    ".ispc",
+                    ".isph"
+                ]
+            }
+        ],
+        "grammars": [
+            {
+                "language": "ispc",
+                "scopeName": "source.ispc",
+                "path": "./syntaxes/ispc.tmLanguage.json"
+            }
+        ]
+    }
+}
