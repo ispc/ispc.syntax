@@ -3,9 +3,11 @@
 #include "header.isph"
 # ^ meta.preprocessor.ispc keyword.control.import.ispc
 #        ^ string.quoted.double.ispc
-
-#ifdef FEATURE
+#include <header.isph>
 # ^ meta.preprocessor.ispc keyword.control.import.ispc
+#        ^ string.quoted.other.include.ispc
+#ifdef FEATURE
+# ^ meta.preprocessor.conditional.ispc keyword.control.preprocessor.ispc
 #define FEATURE_VAL 1
 #       ^ meta.preprocessor.ispc constant.other.ispc
 #                   ^ source.ispc meta.preprocessor.ispc constant.numeric.integer.decimal.ispc
@@ -90,6 +92,18 @@ task void parallel_task(uniform int start, uniform int end) {
 #         ^ entity.name.function.ispc
 }
 
+extern const uniform int foo(unsigned const int t, float &t1, float& t2){
+#^ storage.modifier.ispc
+#       ^ storage.modifier.ispc
+#             ^ storage.modifier.ispc
+#                     ^ storage.type.ispc
+#                         ^ entity.name.function.ispc
+
+    int a = max() + bar();
+#           ^ entity.name.function.ispc
+#                   ^ entity.name.function.ispc
+}
+
 // Launch/sync
 launch[10000] x(f);
 sync;
@@ -118,6 +132,12 @@ uniform int (*funcPtr)(varying float x);
 #       ^ storage.type.ispc
 #           ^ meta.function.pointer.ispc
 #                         ^ storage.modifier.ispc
+typedef const float (*FuncType)(float);
+# ^ storage.modifier.ispc
+#       ^ storage.modifier.ispc
+#             ^ storage.type.ispc
+#                    ^ meta.function.pointer.ispc
+#                               ^ storage.type.ispc
 
 // Operator overloading
 operator+(uniform Vec3 a, uniform Vec3 b) uniform {
