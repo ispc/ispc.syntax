@@ -5,7 +5,8 @@
     "scopeName": "source.ispc",
     "fileTypes": [
         "ispc",
-        "isph"
+        "isph",
+        "ih"
     ],
     "patterns": [
         {
@@ -33,6 +34,9 @@
             "include": "#pragmas"
         },
         {
+            "include": "#function-calls"
+        },
+        {
             "include": "#functions"
         },
         {
@@ -46,8 +50,64 @@
         "preprocessor": {
             "patterns": [
                 {
+                    "name": "meta.preprocessor.conditional.ispc",
+                    "begin": "^\\s*(#\\s*(if|ifdef|ifndef|elif)\\b)(?=.*\\n)",
+                    "beginCaptures": {
+                        "1": {
+                            "name": "keyword.control.preprocessor.ispc"
+                        }
+                    },
+                    "end": "(?=(?://|/\\*))|$",
+                    "patterns": [
+                        {
+                            "include": "#operators"
+                        },
+                        {
+                            "include": "#comments"
+                        },
+                        {
+                            "include": "#strings"
+                        },
+                        {
+                            "include": "#numbers"
+                        },
+                        {
+                            "include": "#identifiers"
+                        }
+                    ]
+                },
+                {
                     "name": "meta.preprocessor.ispc",
-                    "begin": "^\\s*#\\s*(include|define|undef|if(n?def)?|else|elif|endif|line|error|warning)\\b",
+                    "begin": "^\\s*#\\s*(include)\\b",
+                    "beginCaptures": {
+                        "0": {
+                            "name": "keyword.control.import.ispc"
+                        }
+                    },
+                    "end": "(?=(?://|/\\*))|$",
+                    "patterns": [
+                        {
+                            "name": "string.quoted.other.include.ispc",
+                            "begin": "<",
+                            "end": ">"
+                        },
+                        {
+                            "include": "#comments"
+                        },
+                        {
+                            "include": "#strings"
+                        },
+                        {
+                            "include": "#numbers"
+                        },
+                        {
+                            "include": "#identifiers"
+                        }
+                    ]
+                },
+                {
+                    "name": "meta.preprocessor.ispc",
+                    "begin": "^\\s*#\\s*(define|undef|else|endif|line|error|warning)\\b",
                     "beginCaptures": {
                         "0": {
                             "name": "keyword.control.import.ispc"
@@ -185,7 +245,7 @@
                 },
                 {
                     "name": "keyword.operator.bitwise.ispc",
-                    "match": "&|\\||\\^|~|<<|>>"
+                    "match": "&(?!\\s*[A-Za-z_])|\\||\\^|~|<<|>>"
                 },
                 {
                     "name": "keyword.operator.comparison.ispc",
@@ -224,11 +284,62 @@
                 }
             ]
         },
+        "function-calls": {
+            "patterns": [
+                {
+                    "match": "\\b([A-Za-z_][A-Za-z0-9_]*)\\s*(?=\\()",
+                    "captures": {
+                        "1": {
+                            "name": "entity.name.function.ispc"
+                        }
+                    }
+                }
+            ]
+        },
         "functions": {
             "patterns": [
                 {
+                    "name": "meta.function.pointer.ispc",
+                    "begin": "(?x)\n\\b(uniform|varying)?\\s*\n([A-Za-z_][A-Za-z0-9_]*\\s+)\n(\\(\\s*\\*\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*\\))\\s*\\(",
+                    "beginCaptures": {
+                        "1": {
+                            "name": "storage.modifier.ispc"
+                        },
+                        "2": {
+                            "name": "storage.type.ispc"
+                        },
+                        "3": {
+                            "name": "meta.function.pointer.ispc"
+                        }
+                    },
+                    "end": "\\)",
+                    "patterns": [
+                        {
+                            "patterns": [
+                                {
+                                    "include": "#keywords"
+                                }
+                            ]
+                        },
+                        {
+                            "match": "(?x)\n  (?:\\b(uniform|varying)\\s+)*\n  ([A-Za-z_][A-Za-z0-9_]*(?:<[^>]+>)?\\s+)",
+                            "captures": {
+                                "1": {
+                                    "name": "storage.modifier.ispc"
+                                },
+                                "2": {
+                                    "name": "storage.type.ispc"
+                                }
+                            }
+                        },
+                        {
+                            "include": "#comments"
+                        }
+                    ]
+                },
+                {
                     "name": "meta.function.declaration.ispc",
-                    "begin": "(?x)\n  (?:\\b(export|task|inline|noinline|uniform|varying)\\s+)*  # Optional modifiers\n  ([A-Za-z_][A-Za-z0-9_]*(?:<[^>]+>)?\\s+)*              # Return type with optional template\n  ([A-Za-z_][A-Za-z0-9_]*)\\s*                          # Function name\n  (?=\\()",
+                    "begin": "(?x)\n  (?:\\b(export|task|inline|noinline|uniform|varying)\\s+)*  # Optional modifiers\n  ([A-Za-z_][A-Za-z0-9_]*(?:<[^>]+>)?\\s+)              # Required return type\n  ([A-Za-z_][A-Za-z0-9_]*)\\s*                          # Function name\n  (?=\\()",
                     "beginCaptures": {
                         "1": {
                             "name": "storage.modifier.ispc"
@@ -243,77 +354,51 @@
                     "end": "(?<=\\})|(?=;)",
                     "patterns": [
                         {
-                            "include": "#function-parameters"
+                            "name": "meta.function.parameters.ispc",
+                            "begin": "\\(",
+                            "beginCaptures": {
+                                "0": {
+                                    "name": "punctuation.section.parameters.begin.ispc"
+                                }
+                            },
+                            "end": "\\)",
+                            "endCaptures": {
+                                "0": {
+                                    "name": "punctuation.section.parameters.end.ispc"
+                                }
+                            },
+                            "patterns": [
+                                {
+                                    "match": "(?x)\n  ((?:\\b(?:uniform|varying|unsigned|signed|const)\\b\\s*)*)\n  ([A-Za-z_][A-Za-z0-9_]*(?:<[^>]+>)?\\s+)\n  (&)?",
+                                    "captures": {
+                                        "1": {
+                                            "name": "storage.modifier.ispc"
+                                        },
+                                        "2": {
+                                            "patterns": [
+                                                {
+                                                    "include": "#keywords"
+                                                }
+                                            ]
+                                        },
+                                        "3": {
+                                            "name": "keyword.operator.reference.ispc"
+                                        }
+                                    }
+                                },
+                                {
+                                    "include": "#comments"
+                                },
+                                {
+                                    "match": ",",
+                                    "name": "punctuation.separator.parameter.ispc"
+                                }
+                            ]
                         },
                         {
                             "include": "#function-body"
                         }
                     ]
-                },
-                {
-                    "name": "meta.function.pointer.ispc",
-                    "begin": "(?x)\n\\b(uniform|varying)?\\s*\n([A-Za-z_][A-Za-z0-9_]*\\s+)\n(\\(\\s*\\*\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*\\))\\s*\\(",
-                    "beginCaptures": {
-                        "1": { "name": "storage.modifier.ispc" },
-                        "2": { "name": "storage.type.ispc" },
-                        "3": { "name": "meta.function.pointer.ispc" },
-                        "4": { "name": "variable.other.ispc" }
-                    },
-                    "end": "\\)",
-                    "patterns": [
-                        {
-                            "match": "(?x)\n  (?:\\b(uniform|varying)\\s+)*\n  ([A-Za-z_][A-Za-z0-9_]*(?:<[^>]+>)?\\s+)\n  ([A-Za-z_][A-Za-z0-9_]*)",
-                            "captures": {
-                                "1": { "name": "storage.modifier.ispc" },
-                                "2": { "name": "storage.type.ispc" },
-                                "3": { "name": "variable.parameter.ispc" }
-                            }
-                        },
-                        {
-                            "include": "#comments"
-                        }
-                    ]
-                }
-            ]
-        },
-        "function-parameters": {
-            "name": "meta.function.parameters.ispc",
-            "begin": "\\(",
-            "beginCaptures": {
-                "0": {
-                    "name": "punctuation.section.parameters.begin.ispc"
-                }
-            },
-            "end": "\\)",
-            "endCaptures": {
-                "0": {
-                    "name": "punctuation.section.parameters.end.ispc"
-                }
-            },
-            "patterns": [
-                {
-                    "match": "(?x)\n  (?:\\b(uniform|varying)\\s+)*\n  ([A-Za-z_][A-Za-z0-9_]*(?:<[^>]+>)?\\s+)\n  ([A-Za-z_][A-Za-z0-9_]*)\n  (?:\\s*(\\[\\s*\\])?)",
-                    "captures": {
-                        "1": {
-                            "name": "storage.modifier.ispc"
-                        },
-                        "2": {
-                            "name": "storage.type.ispc"
-                        },
-                        "3": {
-                            "name": "variable.parameter.ispc"
-                        },
-                        "4": {
-                            "name": "meta.brackets.ispc"
-                        }
-                    }
-                },
-                {
-                    "include": "#comments"
-                },
-                {
-                    "match": ",",
-                    "name": "punctuation.separator.parameter.ispc"
                 }
             ]
         },
@@ -390,10 +475,6 @@
                 {
                     "match": "\\b[A-Z][A-Z0-9_]+\\b",
                     "name": "constant.other.ispc"
-                },
-                {
-                    "match": "[a-zA-Z_][a-zA-Z_0-9]*",
-                    "name": "variable.other.ispc"
                 }
             ]
         }
