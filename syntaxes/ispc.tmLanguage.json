@@ -1,5 +1,6 @@
 {
     "_copyright": "Copyright (c) 2025, Intel Corporation",
+    "_notice": "These contents may have been developed with support from one or more Intel-operated generative artificial intelligence solutions.",
     "name": "ISPC",
     "scopeName": "source.ispc",
     "fileTypes": [
