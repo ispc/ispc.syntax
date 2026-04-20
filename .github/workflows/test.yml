@@ -24,7 +24,7 @@ jobs:
 
       # Set up Node.js using a pinned commit SHA.
       - name: Set up Node.js
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # 6.3.0
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # 6.4.0
         # Replace the above SHA with your chosen pinned commit.
         with:
           node-version: '18'
